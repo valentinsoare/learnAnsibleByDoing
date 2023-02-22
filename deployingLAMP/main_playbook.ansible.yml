@@ -1,0 +1,93 @@
+---
+- name: 'Installing and enabling firewall'
+  hosts: all
+    
+  tasks:
+    - name: 'Installing firewall'
+      yum:
+        name: firewalld
+        state: present
+
+    - name: 'Cleaning after instalation'
+      yum:
+        autoremove: true
+
+    - name: 'Enable and start firewalld service'
+      systemd:
+        name: "firewalld.service"
+        enabled: true
+        state: started
+
+
+- name: 'Setup LAMP server'
+  hosts: lamp
+
+  tasks:
+    - name: 'Include Variables'
+      include_vars: vars/allvars.ansible.yml
+    
+    - name: 'Install/enable/start the LAMP server'
+      include_tasks: tasks/lamp.ansible.yml
+    
+    - name: 'Open the port for httpd'
+      firewalld:
+        port: "{{ item }}/tcp"
+        permanent: true
+        immediate: true
+        state: enabled
+      with_items:
+      - 80
+      - 443
+    
+    - name: 'Create index.html'
+      lineinfile:
+        path: "{{ web_root }}/index.html"
+        line: "{{ ansible_fqdn }} ({{ ansible_default_ipv4.address }}) managed by Ansible\n"
+        create: true
+        mode: 0644
+
+    - name: 'Check if http and https endpoints are reachable'
+      uri:
+        url: "{{ item }}://{{ ansible_host }}"
+        method: GET
+        timeout: 5
+        return_content: true
+      register: protocol_testing
+      failed_when: false
+
+      with_items:
+      - http
+      - https
+
+    - name: 'Show testing reachability'
+      debug:
+        var: protocol_testing
+    
+- name: 'Setup file server'
+  hosts: file
+
+  tasks:
+    - name: 'Include variables'
+      include_vars: vars/allvars.ansible.yml
+    
+    - name: 'Install/enable/start the file server'
+      include_tasks: tasks/file.ansible.yml
+    
+    - name: 'Open the port for vsftpd service'
+      firewalld:
+        port: "{{ item }}/tcp"
+        permanent: true
+        immediate: true
+        state: enabled
+      with_items:
+      - 20
+      - 21
+      - 990
+    
+    - name: 'Open ports for samba service'
+      firewalld:
+        service: samba
+        permanent: true
+        immediate: true
+        state: enabled
+...

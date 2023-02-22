@@ -1,0 +1,21 @@
+---
+- name: 'Install and start the file servers'
+  yum:
+    name:
+     - "{{ ansible_facts.ansible_local.custom.packages.samba_package }}"
+     - "{{ ansible_facts.ansible_local.custom.packages.ftp_package }}"
+    state: present
+  
+- name: 'Cleaning'
+  yum:
+    autoremove: true
+
+- name: 'Starting smb and ftp services'
+  systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  with_items:
+    - "{{ ansible_facts.ansible_local.custom.services.samba_service }}"
+    - "{{ ansible_facts.ansible_local.custom.services.ftp_service }}"
+...

@@ -1,0 +1,21 @@
+---
+- name: 'Install and start the DB and web servers'
+  yum:
+    name:
+      - "{{ ansible_facts.ansible_local.custom.packages.db_package }}"
+      - "{{ ansible_facts.ansible_local.custom.packages.web_package }}"
+    state: present
+  
+- name: 'Cleaning'
+  yum:
+    autoremove: true
+
+- name: 'Starting mariadbd and httpd services'
+  systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  with_items:
+    - "{{ ansible_facts.ansible_local.custom.services.db_service }}"
+    - "{{ ansible_facts.ansible_local.custom.services.web_service }}"
+...

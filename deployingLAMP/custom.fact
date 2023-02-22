@@ -1,0 +1,11 @@
+[packages]
+samba_package=samba
+ftp_package=vsftpd
+db_package=mariadb-server
+web_package=httpd
+
+[services]
+samba_service=smb
+ftp_service=vsftpd
+db_service=mariadb
+web_service=httpd

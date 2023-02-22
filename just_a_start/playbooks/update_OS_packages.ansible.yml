@@ -1,0 +1,17 @@
+---
+- name: 'Updating the OS'
+  hosts: all
+  become: 
+  
+  tasks:
+  - name: 'Executing yum update....'
+    yum:
+      name: "*"
+      state: 
+      update_only: true
+      skip_broken: true
+  
+  - name: 'Cleaning after update'
+    yum:
+      autoremove: true 
+... 

@@ -1,0 +1,64 @@
+---
+- name: 'Deploying a web server'
+  hosts: all
+  become: true
+  
+  tasks:
+  - name: 'Install httpd'
+    yum:
+      name: httpd
+      state: present
+  
+  - name: 'Cleaning after installation'
+    yum:
+      autoremove: true
+
+  - name: "Enabling and starting the services"
+    systemd:
+      name: "{{ item }}.service"
+      enabled: true
+      state: started
+    with_items:
+    - firewalld
+    - httpd
+  
+  - name: 'Open ports: 80 and 443'
+    firewalld:
+      port: "{{ item }}/tcp"
+      permanent: true
+      immediate: true
+      state: enabled
+    with_items:
+      - 80
+      - 443
+  
+  - name: 'Check for open ports'
+    wait_for:
+      host: "{{ ansible_host }}"
+      port: "{{ item }}"
+      state: started
+      delay: 0
+      timeout: 5
+    register: port_checking
+    with_items:
+      - 80
+      - 443
+
+  - name: 'Creating content in /var/www/html/index.html'
+    lineinfile:
+      path: /var/www/html/index.html
+      line: 'Welcome To Republica - All GOOD!'
+      create: true
+      mode: 0644
+  
+  - name: 'Check if http and https endpoints are reachable'
+    uri:
+      url: "{{ item }}://{{ ansible_host }}"
+      method: GET
+      timeout: 20
+      return_content: true
+      status_code: 200
+    with_items:
+      - http
+      - https
+...

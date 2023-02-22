@@ -1,0 +1,11 @@
+[package]
+smb_package=smb
+ftp_package=vsftp
+db_package=mariadb
+web_package=http
+
+[service]
+smb_service=smbd.service
+ftp_service=vsftpd.service
+db_service=mariadb.service
+web_package=httpd.service
