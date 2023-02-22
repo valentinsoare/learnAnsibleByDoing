@@ -53,16 +53,16 @@
         timeout: 5
         return_content: true
       register: protocol_testing
-      failed_when: false
-
+      ignore_errors: true
       with_items:
       - http
       - https
 
-    - name: 'Show testing reachability'
+    - name: "Printing reachability results"
       debug:
-        var: protocol_testing
-    
+        msg: "URL: {{ protocol_testing.results[0].url }}, STATUS_CODE: {{ protocol_testing.results[0].status }}"
+
+
 - name: 'Setup file server'
   hosts: file
 
