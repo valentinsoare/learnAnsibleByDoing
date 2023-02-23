@@ -27,5 +27,5 @@
     
     - name: 'Printing last 5 users from passwd... '
       debug:
-        var: results.stdout_lines 
+        var: results.stdout_lines
 ...
