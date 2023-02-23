@@ -21,7 +21,7 @@
     
     - name: 'Read passwd file...'
       shell:
-        cmd: tail -5 /etc/passwd
+        cmd: cat /etc/passwd | tail -5
       register: results
       changed_when: results.rc == 0
     
