@@ -1,0 +1,12 @@
+---
+- name: 'Installing packages'
+  yum:
+    name: "{{ inner_item }}"
+    state: latest
+    skip_broken: true
+      
+  with_items:
+    - "{{ ansible_mounts }}"
+      
+  when: item.mount == '/' and item.size_available >= 2000000000
+...

@@ -1,5 +1,5 @@
 ---
-- name: 'Creating users for FILE server'
+- name: 'Add users for FILE server'
   hosts: file
 
   tasks:
@@ -15,17 +15,23 @@
         home: "{{ item.home }}"
         skeleton: "{{ item.skeleton }}"
       
-      with_items:
+      loop:
         - { name: 'house', groups: 'wheel', shell: '/bin/bash', createhome: 'yes', home: '/home/house', skeleton: '/etc/skel' }
         - { name: 'chase', groups: 'wheel', shell: '/bin/bash', createhome: 'yes', home: '/home/chase', skeleton: '/etc/skel' }
     
-    - name: 'Read passwd file...'
+    - name: 'Read last 5 entries from the passwd file.'
       shell:
         cmd: cat /etc/passwd | tail -5
       register: results
       changed_when: results.rc == 0
     
-    - name: 'Printing last 5 users from passwd... '
+    - name: 'Display what we read from passwd file. '
       debug:
         var: results.stdout_lines
 ...
+
+
+
+
+
+

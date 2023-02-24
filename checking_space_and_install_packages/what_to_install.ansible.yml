@@ -1,0 +1,16 @@
+---
+- name: 'Installing the following packages htop, traceroute and nmap after available space is checked'
+  hosts: file
+  become: true
+
+  tasks:
+    - name: 'Include isntall tasks'
+      include_tasks: exec_install.ansible.yml
+    
+      loop:
+        - [traceroute, nmap]
+      
+      loop_control:
+        extended: true
+        loop_var: inner_item
+...
