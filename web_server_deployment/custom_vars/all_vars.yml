@@ -1,0 +1,10 @@
+---
+remote_dir: /etc/ansible/facts.d
+facts_file: ../custom_facts/packages_services_ports.fact
+repo_files: [mongodb-org-6.0.repo, nginx.repo]
+packages_to_install: [yum-utils, vsftpd, nginx, samba, fail2ban, mongodb-org]
+libraries: [pcre, pcre-devel, zlib, zlib-devel, openssl, openssl-devel]
+services: [smb, vsftpd, nginx, mongod, fail2ban, firewalld]
+firewall_services: [samba, mongodb, ftp, http, https, ssh]
+needed_ports: [21, 139, 445, 80, 443, 27017]
+...

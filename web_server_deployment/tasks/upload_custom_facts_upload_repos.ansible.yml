@@ -1,0 +1,57 @@
+---
+- name: 'Create folder remote and upload facts'
+  block:
+    - name: 'Creating folder'
+      file:
+        state: directory
+        recurse: true
+        path: "{{ remote_dir }}"
+
+    - name: 'Upload facts'
+      copy:
+        src: "{{ facts_file }}"
+        dest: "{{ remote_dir }}"
+        mode: 0644
+
+  always:
+    - name: "Checking existence of facts file"
+      shell:
+        cmd: |
+          
+          if [[ -d /etc/ansible/facts.d && "$(find /etc/ansible/facts.d -type f -print | wc -l)" != 0 ]]; then
+            printf "%s\n" "OK"
+          else
+            printf "%s\n" "NOK"
+          fi
+
+      register: output_from_shell
+      changed_when: output_from_shell.stdout == "OK"
+
+    
+- name: 'Upload repos'
+  block:
+    - name: 'Upload the repos for mongodb and nginx'
+      copy:
+        src: "/home/vsoare/Documents/OracleEmployer/learnAnsibleByDoing/web_server_deployment/repos/{{ item }}"
+        dest: /etc/yum.repos.d/{{ item }} 
+        mode: 0644
+
+      with_items: "{{ repo_files }}"
+      
+  always:
+    - name: 'Checking repos if all ok'
+      shell:
+        cmd: |
+          declare -a list_to_print
+        
+          for value in "${repo_files[@]}"; do
+            if [[ ! -f /etc/yum.repos.d/"${value}" ]]; then
+              list_to_print+=( 'value' )
+            fi
+          done
+
+          printf "%s\n" "${list_to_print}"
+
+      register: output_for_repos
+      changed_when: output_for_repos.stdout != ""
+...

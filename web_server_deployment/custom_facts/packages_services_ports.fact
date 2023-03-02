@@ -1,0 +1,21 @@
+[packages]
+yum_utils_package=yum-utils
+ftp_package=vsftpd
+nginx_package=nginx
+samba_package=samba
+fail2ban_package=fail2ban
+mongodb_package=mongodb-org
+
+[services]
+samba_service=smbd
+ftp_service=vsftpd
+nginx_service=nginx
+mongodb_service=mongod
+fail2ban_service=fail2ban
+firewall_service=firewalld
+
+[ports]
+ftp_ports=[20, 21, 990]
+smb_ports=[139, 445]
+nginx_ports=[80, 443]
+mongodb_ports=[27017]

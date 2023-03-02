@@ -1,0 +1,76 @@
+---
+- name: 'Work on services'
+  block:
+    - name: 'Load/start services'
+      systemd:
+        name: "{{ item }}"
+        enabled: true
+        state: started
+      
+      with_items: "{{ services }}"
+  
+  always:
+    - name: 'Checking services'
+      shell:
+        cmd: |
+          for i in "${services[@]}"; do
+            if systemctl is-active "${i}" != active; then
+              printf "%s\n" "NOK - ${i}"
+            fi
+          done
+      register: result_services
+      changed_when: "'NOK' not in result_services"
+
+- name: 'Make MongoDB work as designed'
+  block:
+  - name: 'Bind MongoDB to 0.0.0.0:27017'
+    shell:
+      cmd: |
+        sed -i -e 's/bindIp: 127.0.0.1/bindIp: 0.0.0.0/g' /etc/mongod.conf
+        grep -i 'bindip' /etc/mongod.conf | cut -d " " -f4
+    register: output_after_editing
+    changed_when: output_after_editing.stdout == "0.0.0.0"
+  
+  - name: 'Restart mongod service'
+    systemd:
+      name: mongod 
+      state: restarted
+      daemon_reload: true
+  rescue:
+    - name: 'Issues on MongoDB config file /etc/mongod.conf'
+      pause:
+        prompt: 'You want to continue [yes/no] ? '
+        echo: yes
+      register: answer_on_mongo_checking
+    
+    - name: 'Implement decisions on failure'
+      meta: end_play
+      when: answer_on_mongo_checking.user_input == 'no'
+
+- name: 'Work on ports'
+  block:
+    - name: 'Open ports'
+      firewalld:
+        service: "{{ item_firewall }}"
+        state: enabled
+        immediate: true
+        permanent: true
+        
+      loop: "{{ firewall_services }}"
+      
+      loop_control:
+        extended: true
+        loop_var: item_firewall
+  always:
+    - name: 'Check open ports and response time'
+      command: nc -zw2 "{{ ansible_host }}" "{{ item }}"
+      
+      with_items: "{{ needed_ports }}"
+
+      register: output_checking_ports
+      changed_when: output_checking_ports.rc == 0
+    
+    - name: 'printing'
+      debug:
+        msg: "{{ output_checking_ports }}"
+... 

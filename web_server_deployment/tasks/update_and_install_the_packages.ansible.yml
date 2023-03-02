@@ -1,0 +1,70 @@
+---
+- name: 'Execute validity checks before install..'
+  block:
+    - name: 'Check for root device and available space'
+      debug:
+        msg: "Available space in / for {{ ansible_nodename }} is greater than 5 GB"
+      changed_when: item.mount == "/" and item.size_available > 5368709120
+
+      with_items: "{{ ansible_mounts }}"
+    
+    - name: 'Check for OS family'
+      debug:
+        msg: 'Node {{ ansible_nodename }} is in the RedHat family.'
+      changed_when: ansible_os_family == "RedHat"
+
+    - name: 'Testing internet connectivity'
+      command: ping 8.8.8.8 -c 5
+      register: ping_result
+      changed_when: ping_result.rc == 0
+
+  rescue:
+    - name: "Ask what to do"
+      pause:
+        prompt: "You want to continue ? [yes/no]"
+        echo: yes
+      delegate_to: true
+      register: result
+      
+
+    - name: 'Exiting playbook....'
+      meta: end_play
+      when: result.user_input == "no"
+
+
+- name: 'Updating and installing the packages'
+  block:
+    - name: 'Get epel-release'
+      yum:
+        name: epel-release
+
+    - name: 'Updating existing packages'
+      yum:
+        name: "*"
+        state: latest
+
+    - name: 'Set to use nginx stable version'
+      command: yum-config-manager --enable nginx-stable
+      register: output_nginx_stable
+      changed_when: output_nginx_stable.rc == 0
+
+
+- name: 'Download and install necessary packages'
+  block:
+    - name: 'implement installing packages'
+      yum:
+        name: "{{ item }}"
+      
+      with_items: "{{ packages_to_install }}"
+    
+  
+    - name: 'Install libraries'
+      yum:
+        name: "{{ library }}"
+
+      loop: "{{ libraries }}"
+
+      loop_control:
+        extended: true
+        loop_var: library
+...

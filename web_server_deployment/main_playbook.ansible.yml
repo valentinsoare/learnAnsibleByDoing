@@ -1,0 +1,22 @@
+---
+- name: 'Deploying a web server with all the trimmings!'
+  hosts: web
+  become: true
+
+  tasks:
+    - name: 'Uploading prerequisites for a proper deployment'
+      block:
+        - name: 'Include variables'
+          include_vars: custom_vars/all_vars.yml
+    
+        - name: 'Include facts and repos'
+          include_tasks: tasks/upload_custom_facts_upload_repos.ansible.yml
+    
+    - name: 'Work on packages, services and ports'
+      block:
+        - name: 'Update OS and install packages with libraries'
+          include_tasks: tasks/update_and_install_the_packages.ansible.yml
+        
+        - name: 'Make services available and ports'
+          include_tasks: tasks/start_services_and_open_ports.ansible.yml
+...
