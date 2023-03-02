@@ -1,5 +1,5 @@
 ---
-- name: 'Installing the following packages htop, traceroute and nmap after available space is checked'
+- name: 'Installing traceroute and nmap after available space is checked'
   hosts: file
   become: true
 

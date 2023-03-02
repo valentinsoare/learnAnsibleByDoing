@@ -1,0 +1,16 @@
+---
+- name: 'JINJA 2 tempalte for file generator'
+  hosts: all
+  become: true
+  
+  vars:
+    system_owner: 'soarevalentinn@gmail.com'
+  tasks:
+    - name: 'Creating the jinja2 template'
+      template:
+        src: intro.j2
+        dest: /home/vsoare/intro
+        owner: root
+        group: root
+        mode: 0644
+...
